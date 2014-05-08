@@ -1,0 +1,16 @@
+{
+  "title": "NowRTC",
+  "name": "nowrtc",
+  "description": "AngularJS wrapper for WebRTC features",
+  "version": "0.0.1",
+  "author": {
+    "name": "Scott Marshall",
+    "email": "scott.marshall@servicenow.com"
+  },
+  "devDependencies": {
+    "karma": ">= 0.12.15",
+    "karma-jasmine": ">= 0.1.5",
+    "grunt": ">= 0.4.4",
+    "grunt-cli": ">= 0.1.13"
+  }
+}
