@@ -9,8 +9,9 @@
   },
   "devDependencies": {
     "karma": ">= 0.12.15",
-    "karma-jasmine": ">= 0.1.5",
+    "karma-jasmine": "^0.1.5",
     "grunt": ">= 0.4.4",
-    "grunt-cli": ">= 0.1.13"
+    "grunt-cli": ">= 0.1.13",
+    "karma-chrome-launcher": "^0.1.3"
   }
 }
