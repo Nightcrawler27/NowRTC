@@ -1,4 +1,4 @@
-angular.module("now.rtc").factory("NRTCPeerConnection", function($q) {
+angular.module("now.rtc").factory("NRTCPeerConnection", function($q, RTCDataChannel) {
     "use strict";
 
     function NRTCPeerConnection(configuration) {
@@ -15,7 +15,7 @@ angular.module("now.rtc").factory("NRTCPeerConnection", function($q) {
     }
 
     NRTCPeerConnection.prototype = {
-        createOffer: function(constraints) {
+        createOffer: function() {
             var deferred = $q.defer();
 
             this.peerConnection.createOffer(function(connectionDesc) {
@@ -38,7 +38,7 @@ angular.module("now.rtc").factory("NRTCPeerConnection", function($q) {
         },
 
         createDataChannel: function(stuff) {
-            return this.peerConnection.createDataChannel(stuff)
+            return new RTCDataChannel(this.peerConnection.createDataChannel(stuff));
         },
 
         addIceCandidate: function(candidate) {

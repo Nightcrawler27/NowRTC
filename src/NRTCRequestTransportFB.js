@@ -1,14 +1,14 @@
 /* globals Firebase */
-angular.module("now.rtc").factory("NRTCReqeustTransport", function($q, RTCOffer) {
+angular.module("now.rtc").factory("NRTCRequestTransport", function($q, RTCOffer) {
     "use strict";
 
-    function NRTCReqeustTransportFB(url, sessionID) {
+    function NRTCRequestTransportFB(url, sessionID) {
         this.sessionID = sessionID;
         this.fb = new Firebase(url);
         Firebase.goOnline();
     }
 
-    NRTCReqeustTransportFB.prototype = {
+    NRTCRequestTransportFB.prototype = {
         initiate: function(info, user, key) {
             var deferred = $q.defer();
 
@@ -53,5 +53,5 @@ angular.module("now.rtc").factory("NRTCReqeustTransport", function($q, RTCOffer)
         }
     };
 
-    return NRTCReqeustTransportFB;
+    return NRTCRequestTransportFB;
 })

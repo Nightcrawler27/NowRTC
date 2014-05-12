@@ -1,22 +1,12 @@
-/* global RTCPeerConnection, RTCSessionDescription, RTCIceCandidate */
-angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q, browserCompatibility, NRTCPeerConnection) {
+angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q, NRTCPeerConnection, RTCIceCandidate, RTCSessionDescription) {
     "use strict";
-
-    var cfg = {"iceServers":[{"url":"stun:23.21.150.121"}]};
-
-    var constraints = {
-        optional : [],
-        mandatory : {
-            OfferToReceiveAudio : true,
-            OfferToReceiveVideo : true
-        }
-    }
 
     function onError(error) {
         throw error;
     }
 
-    function NRTCPeer(signalChannel, constraints) {
+    function NRTCPeer(signalChannel, config, constraints) {
+        this.config = config;
         this.signalChannel = signalChannel;
         this.messages = [];
         this.constraints = angular.extend({
@@ -31,16 +21,15 @@ angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q, browserCo
 
     NRTCPeer.prototype = {
         initiate: function(streams) {
-            var that = this
+            var that = this;
             this.initiator = true;
             this._setup();
 
             angular.forEach(streams, function(stream) {
                 that.peerConnection.addStream(stream);
-            })
+            });
 
             this.dataChannel = this.peerConnection.createDataChannel("chat");
-            this._dataChannelBindings(this.dataChannel);
             return this.offer.promise;
         },
 
@@ -63,66 +52,45 @@ angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q, browserCo
         },
 
         fromOffer: function(offer) {
-            console.log("listening for incoming request")
             this.offer = $q.defer();
             this.key = offer.key;
             if(!this.peerConnection) {
                 this._setup();
                 this._watchForICE();
                 this.peerConnection.bind("ondatachannel", $.proxy(function (evt) {
-                    console.log("data channel")
-                    this.dataChannel = evt.channel;
-                    this._dataChannelBindings(this.dataChannel);
+                    this.dataChannel = new RTCDataChannel(evt.channel);
                 }, this));
             }
-            this._fromOffer(offer);
+
+            var sessionDescription = new RTCSessionDescription(offer.data);
+            this.key = offer.key;
+            this.peerConnection.setRemoteDescription(sessionDescription).then($.proxy(this._respondToOffer, this), onError);
+
             return this.offer.promise;
         },
 
-        _dataChannelBindings: function(fChannel) {
-            var that = this;
-            fChannel.onopen = function(evt) { console.log("opening channel", evt); }
-            fChannel.onclose = function() { console.log("channel closing") }
-            fChannel.onerror = function(event) { console.log("channel error:", event); }
-            fChannel.onmessage = function(event) { $rootScope.$apply(function() {
-                that.messages.push({
-                    text: event.data
-                });
-            })};
-        },
-
         _setup: function() {
-            console.log("setting up connection")
             if(this.peerConnection)
                 this.peerConnection.close();
 
             this.connecting = true;
-            this._createPeerConnection(this.constraints);
+            this._createPeerConnection();
         },
 
         _watchForICE: function() {
             var that = this;
             this.signalChannel.onCandidate(this.key, this.initiator ? "receiver" : "initiator", function(candidate) {
-                console.log("remote iceCandidate", candidate)
+                console.log("remote iceCandidate", candidate);
                 that.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
             })
         },
 
-        _fromOffer: function(offer) {
-            console.log("creating peer from offer")
-            var sessionDescription = new RTCSessionDescription(offer.data);
-            this.key = offer.key;
-            this.peerConnection.setRemoteDescription(sessionDescription).then($.proxy(this._respondToOffer, this), onError);
-        },
-
         _createOffer: function() {
-            console.log("creating new offer")
             var that = this;
-            this.key = new Date().getTime()
+            this.key = new Date().getTime();
             this.key += ("-" + parseInt(Math.random() * 100000000));
 
-            this.peerConnection.createOffer(constraints).then(function(offer) {
-                console.log("new offer created")
+            this.peerConnection.createOffer(this.constraints).then(function(offer) {
                 that._setLocalDescription(offer).then(function() {
                     that._watchForICE();
                     that.offer.resolve({
@@ -134,7 +102,7 @@ angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q, browserCo
         },
 
         _respondToOffer: function() {
-            var that = this
+            var that = this;
             this.peerConnection.createAnswer().then(function(answer) {
                 that._setLocalDescription(answer).then(function(offer) {
                     that.offer.resolve(offer)
@@ -159,10 +127,10 @@ angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q, browserCo
 
         _createPeerConnection: function() {
             var that = this;
-            var peerConnection = new NRTCPeerConnection(cfg);
+            var peerConnection = new NRTCPeerConnection(this.config);
 
             peerConnection.bind("onicecandidate", function(event) {
-                console.log("local ice candidate")
+                console.log("local ice candidate");
                 if (!event.candidate)
                     return;
 
@@ -171,7 +139,7 @@ angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q, browserCo
 
             peerConnection.bind("onnegotiationneeded", $.proxy(this._createOffer, this));
             peerConnection.bind("oniceconnectionstatechange", function(evt) {
-                console.log("iceConnectionStateChange")
+                console.log("iceConnectionStateChange");
                 $rootScope.$apply(function() {
                     var connectionState = evt.target.iceConnectionState;
                     console.log('>>> IceConnectionStateChanged to ' + connectionState);
@@ -191,13 +159,13 @@ angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q, browserCo
              console.log("stateChange", a, b, c)
              });*/
             peerConnection.bind("onaddstream", function(newStream, b, c) {
-                console.log("new stream", newStream, b, c)
+                console.log("new stream", newStream, b, c);
                 if(that.onStream)
                     that.onStream(newStream);
             });
             this.peerConnection = peerConnection;
         }
-    }
+    };
 
     return NRTCPeer;
-})
+});

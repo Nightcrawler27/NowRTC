@@ -17,6 +17,7 @@ module.exports = function(config) {
     files: [
         'vendor/angular/angular.js',
         'vendor/angular-mocks/angular-mocks.js',
+        'vendor/jquery/dist/jquery.js',
         'src/_module.js',
         'src/NRTC*.js',
         'src/browserCompatibility.js',
