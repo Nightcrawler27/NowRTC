@@ -1,43 +1,41 @@
 angular.module("now.rtc").factory("NRTCPeerConnectionBindings", function(NRTCDataChannel, NRTCPeerActions) {
     return {
         bind: function (payload) {
-            var actions = {
-                onsignalingstatechange: function (evt) {
-                    console.log("signaling state changed", evt)
-                },
+            payload.peerConnection.bind("onsignalingstatechange", function (event) {
+                console.log("signaling state changed", event)
+            });
 
-                onstatechange: function (evt) {
-                    console.log("state changed", evt)
-                },
+            payload.peerConnection.bind("onstatechange", function(event) {
+                console.log("state changed", event)
+            });
 
-                onicecandidate: function (event) {
-                    console.log("local ice candidate");
-                    if (!event.candidate)
-                        return;
+            payload.peerConnection.bind("onicecandidate", function (event) {
+                console.log("local ice candidate");
+                if (!event.candidate)
+                    return;
 
-                    payload.iceChannel.addCandidate(payload.key, payload.initiator ? "initiator" : "receiver", event.candidate);
-                },
+                payload.iceChannel.addCandidate(payload.key, payload.initiator ? "initiator" : "receiver", event.candidate);
+            });
 
-                ondatachannel: function (evt) {
-                    console.log("data channel");
-                    var channel = new NRTCDataChannel(evt.channel);
+            payload.peerConnection.bind("ondatachannel", function (event) {
+                console.log("data channel");
+                var channel = new NRTCDataChannel(event.channel);
 
-                    channel.bind("onmessage", function (a, b, c) {
-                        console.log(a, b, c)
-                    });
-                },
+                channel.bind("onmessage", function (a, b, c) {
+                    console.log(a, b, c)
+                });
+            });
 
-                onnegotiationneeded: function () {
-                    NRTCPeerActions.renegotiate(payload);
-                },
+            payload.peerConnection.bind("oniceconnectionstatechange", function (event) {
+                console.log("iceConnectionStateChange");
+                console.log('>>> IceConnectionStateChanged to ' + event.target.iceConnectionState);
+            });
 
-                oniceconnectionstatechange: function (evt) {
-                    console.log("iceConnectionStateChange");
-                    console.log('>>> IceConnectionStateChanged to ' + evt.target.iceConnectionState);
-                }
-            };
+            //angular.extend(payload.peerConnection, actions);
 
-            angular.extend(payload.peerConnection, actions);
+            payload.peerConnection.bind("onnegotiationneeded", function () {
+                NRTCPeerActions.renegotiate(payload);
+            });
         }
     }
 });

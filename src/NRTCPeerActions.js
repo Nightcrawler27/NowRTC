@@ -22,13 +22,12 @@ angular.module("now.rtc").factory("NRTCPeerActions", function($q, NRTCSessionDes
     function defer(data, methodName, callback, dataMember) {
         var deferred = $q.defer();
         var errorHandler = deferred.reject.bind(deferred);
-        var fn = data.peerConnection[methodName];
         var fnArgs = [wrappedCallback, errorHandler];
 
         if(dataMember)
             fnArgs.unshift(data[dataMember]);
 
-        fn.apply(data.peerConnection, fnArgs);
+        data.peerConnection.trigger(methodName, fnArgs);
 
         function wrappedCallback(answer) {
             callback(data, answer);

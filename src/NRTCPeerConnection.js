@@ -19,7 +19,15 @@ angular.module("now.rtc").factory("NRTCPeerConnection", function() {
             var fn = this.peerConnection[event];
             console.log("triggering ", fn);
             if(fn)
-                fn(data);
+                fn.apply(this.peerConnection, data);
+        },
+
+        addIceCandidate: function(candidate) {
+            this.peerConnection.addIceCandidate(candidate);
+        },
+
+        createDataChannel: function(name) {
+            return this.peerConnection.createDataChannel(name);
         },
 
         close: function() {
