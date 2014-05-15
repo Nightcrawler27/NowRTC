@@ -1,4 +1,3 @@
-/* global webrtcDetectedBrowser, webrtcDetectedVersion, getUserMedia */
 angular.module("now.rtc").factory("browserCompatibility", function() {
     "use strict";
 

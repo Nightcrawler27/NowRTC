@@ -1,4 +1,4 @@
-describe("NRTCPeer", function() {
+describe("NRTCPeerFactory", function() {
     "use strict";
 
     var NRTCPeerFactory, NRTCPeerConnection, OfferTransport, ICETransport, $rootScope;
@@ -33,12 +33,31 @@ describe("NRTCPeer", function() {
             expect(peer).toBeDefined();
         });
 
-        it("creates an offer when a data channel is requested", function() {
+        it("sets up RTC initiation sequence", function() {
             var peer = peerFactory.initiate("my_key", [], "some_user");
             var dataChannel = peer.createDataChannel();
             NRTCPeerConnection.flushOffer();
             expect(dataChannel).toBeDefined();
-        })
+        });
+
+        it("listens for offers", function() {
+            spyOn(peerFactory, "fromOffer");
+            var pendingOffer = {
+                value: { key: "my_key" }
+            };
+
+            peerFactory.listen(angular.noop);
+            OfferTransport.flush(pendingOffer);
+
+            expect(peerFactory.fromOffer).toHaveBeenCalledWith(pendingOffer);
+        });
+
+        it("sets up RTC response sequence", function() {
+            var peer = peerFactory.initiate("my_key", [], "some_user");
+            var dataChannel = peer.createDataChannel();
+            NRTCPeerConnection.flushOffer();
+            expect(dataChannel).toBeDefined();
+        });
     });
 
     describe("offer response", function () {

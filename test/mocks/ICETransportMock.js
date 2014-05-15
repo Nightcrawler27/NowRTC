@@ -1,4 +1,4 @@
-angular.module("now.rtcmocks").factory("NRTCSignalServer", function() {
+angular.module("now.rtcmocks").factory("ICETransport", function() {
     "use strict";
 
     function NRTCSignalServerMock(root, sessionID) {}

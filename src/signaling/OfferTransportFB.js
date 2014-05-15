@@ -1,5 +1,4 @@
-/* globals Firebase */
-angular.module("now.rtc").factory("NRTCRequestTransport", function($q, RTCOffer) {
+angular.module("now.rtc").factory("OfferTransport", function($q, RTCOffer) {
     "use strict";
 
     function NRTCRequestTransportFB(url, sessionID) {
@@ -9,19 +8,20 @@ angular.module("now.rtc").factory("NRTCRequestTransport", function($q, RTCOffer)
     }
 
     NRTCRequestTransportFB.prototype = {
-        initiate: function(info, user, key) {
+        initiate: function(configuration) {
             var deferred = $q.defer();
 
-            var requestRef = this.fb.child(user + "/offers").push({
-                initiator: window.NOW.userID,
-                data: info,
-                key: key
+            var requestRef = this.fb.child(configuration.targetUser + "/offers").push({
+                initiator: configuration.initiator,
+                data: configuration.localDescription,
+                key: configuration.key
             });
 
             requestRef.child("state").on("value", function(value) {
                 if (value && value.val() === "accepted") {
                     requestRef.child("response").once("value", function(data) {
-                        deferred.resolve(data.val());
+                        configuration.remoteDescription = new RTCSessionDescription(data.val());
+                        deferred.resolve(configuration);
                     })
                 } else if (value && value.val() === "rejected") {
                     deferred.reject();
@@ -54,4 +54,4 @@ angular.module("now.rtc").factory("NRTCRequestTransport", function($q, RTCOffer)
     };
 
     return NRTCRequestTransportFB;
-})
+});

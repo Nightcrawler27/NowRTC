@@ -58,12 +58,12 @@ angular.module("now.rtcmocks").factory("NRTCPeerConnection", function($q) {
         if(offers.length > 0)
             offers.shift().resolve(offer);
         else
-            throw "No outstanding offers to flush";
+            throw new TypeError("No outstanding offers to flush");
     };
 
-    NRTCPeerConnectionMock.ensureNoOutstandingOffers = function(offer) {
-        if(offers.length > 0)
-            throw "Expected no outstanding offers.  There are " + offers.length;
+    NRTCPeerConnectionMock.ensureNoOutstandingOffers = function(offers) {
+        if(offers && offers.length > 0)
+            throw new TypeError("Expected no outstanding offers.  There are " + offers.length);
     };
 
     return NRTCPeerConnectionMock;

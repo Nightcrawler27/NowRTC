@@ -1,3 +1,3 @@
-angular.module("now.rtc").factory("RTCIceCandidate", function() {
-    return function() {}
+angular.module("now.rtc").factory("NRTCIceCandidate", function() {
+    return RTCIceCandidate;
 });

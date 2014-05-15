@@ -1,8 +1,3 @@
-angular.module("now.rtc").factory("RTCSessionDescription", function() {
-    return function(sdp) {
-        return {
-            sdp: sdp,
-            type: null
-        }
-    }
+angular.module("now.rtc").factory("NRTCSessionDescription", function() {
+    return RTCSessionDescription;
 });
