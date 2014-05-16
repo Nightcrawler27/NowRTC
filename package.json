@@ -12,6 +12,7 @@
     "karma-jasmine": "^0.1.5",
     "grunt": ">= 0.4.4",
     "grunt-cli": ">= 0.1.13",
-    "karma-chrome-launcher": "^0.1.3"
+    "karma-chrome-launcher": "^0.1.3",
+    "grunt-contrib-concat": "^0.4.0"
   }
 }
