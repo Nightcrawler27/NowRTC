@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <script src="../vendor/angular/angular.js"></script>
+        <script src="../vendor/jquery/dist/jquery.js"></script>
+        <script src="../lib/adapter.js"></script>
+        <script src="../vendor/firebase/firebase.js"></script>
+        <script src="../src/_nowRTC.js"></script>
+        <script src="../src/NRTCPeer.js"></script>
+        <script src="../src/NRTCPeerConnection.js"></script>
+        <script src="../src/NRTCPeerConnectionBindings.js"></script>
+        <script src="../src/NRTCPeerActions.js"></script>
+        <script src="../src/signaling/websockets/OfferTransportWS.js"></script>
+        <script src="../src/signaling/websockets/ICETransportWS.js"></script>
+        <script src="../src/signaling/websockets/RTCOfferWS.js"></script>
+        <script src="../src/NRTCDataChannel.js"></script>
+        <script src="../src/NRTCIceCandidate.js"></script>
+        <script src="../src/NRTCSessionDescription.js"></script>
+        <script src="../src/NRTCPeerFactory.js"></script>
+        <script src="../vendor/socket.io-client/dist/socket.io.js"></script>
+        <script src="script/test.js"></script>
+    </head>
+    <body ng-app="foo">
+        <div ng-controller="ChatTest">
+            <button ng-click="start()">Start</button>
+            <button ng-click="listen()">Listen</button>
+            <button ng-click="message()">Message</button>
+            <button ng-click="video()">Video</button>
+        </div>
+        <div id="local"></div>
+    </body>
+</html>
