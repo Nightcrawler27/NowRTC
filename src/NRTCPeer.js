@@ -10,22 +10,20 @@ angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q) {
                 OfferToReceiveVideo : true
             }
         }, constraints);
-        this.offer = $q.defer();
     }
 
     NRTCPeer.prototype = {
         send: function(message) {
+            console.log(this.dataChannel);
             this.dataChannel.send(message)
         },
 
         addStream: function(stream) {
-            if(this.peerConnection) {
-                this.offer = $q.defer();
-                this.peerConnection.addStream(stream);
-                return this.offer.promise;
-            } else {
-                return this.initiate([stream]);
-            }
+            this.peerConnection.addStream(stream);
+        },
+
+        onStream: function(callback) {
+            this.peerConnection.bind("onaddstream", callback);
         },
 
         createDataChannel: function() {
@@ -34,6 +32,7 @@ angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q) {
             dataChannel.onclose = function() { console.log("channel closing") };
             dataChannel.onerror = function(event) { console.log("channel error:", event); };
             dataChannel.onmessage = function(event) { $rootScope.$apply(function() {})};
+            this.dataChannel = dataChannel;
             return dataChannel;
         },
 

@@ -1,4 +1,4 @@
-angular.module("now.rtc").factory("ICETransport", function() {
+angular.module("now.rtc").factory("ICETransport", function($timeout) {
     'use strict';
 
     function ICETransportFB(url) {
@@ -33,8 +33,10 @@ angular.module("now.rtc").factory("ICETransport", function() {
             console.log("watch for ice candidates", type);
             this.socket.on("ice_candidate", function(item) {
                 if(item.key === key) {
-                    console.log("remote ice candidate");
-                    callback(new RTCIceCandidate(item));
+                    $timeout(function() {
+                        console.log("remote ice candidate");
+                        callback(new RTCIceCandidate(item));
+                    }, 500)
                 }
             });
         },

@@ -23,9 +23,15 @@
         <div ng-controller="ChatTest">
             <button ng-click="start()">Start</button>
             <button ng-click="listen()">Listen</button>
-            <button ng-click="message()">Message</button>
             <button ng-click="video()">Video</button>
+            <div>
+                <input ng-model="message" />
+                <button ng-click="sendMessage()">Message</button>
+            </div>
+            <div>
+                <video id="local" autoplay></video>
+                <video id="remote" autoplay></video>
+            </div>
         </div>
-        <div id="local"></div>
     </body>
 </html>

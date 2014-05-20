@@ -9,7 +9,7 @@ angular.module("now.rtc").factory("NRTCPeerConnectionBindings", function(NRTCDat
                 console.log("state changed", event)
             });
 
-            payload.peerConnection.bind("onicecandidate", function (event) {
+            payload.peerConnection.bind("onicecandidate", function(event) {
                 console.log("local ice candidate");
                 if (!event.candidate)
                     return;
@@ -34,6 +34,7 @@ angular.module("now.rtc").factory("NRTCPeerConnectionBindings", function(NRTCDat
             //angular.extend(payload.peerConnection, actions);
 
             payload.peerConnection.bind("onnegotiationneeded", function () {
+                console.log("Negotiation needed");
                 NRTCPeerActions.renegotiate(payload);
             });
         }

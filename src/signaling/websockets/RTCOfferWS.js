@@ -36,4 +36,4 @@ angular.module("now.rtc").factory("RTCOffer", function() {
     };
 
     return RTCOfferWS;
-})
+});

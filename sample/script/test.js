@@ -11,20 +11,21 @@ angular.module("foo", ["now.rtc"]).controller("ChatTest", function($scope, NRTCP
     $scope.listen = function() {
         peerFactory.listen(function(peer) {
             $scope.peerConnection = peer;
+            $scope.peerConnection.onStream(function(evt){
+                attachMediaStream($("#remote")[0], evt.stream);
+                $scope.remoteStream = evt.stream;
+            })
         });
     };
 
-    $scope.message = function() {
-        $scope.dataChannel.send("saldjf")
+    $scope.sendMessage = function() {
+        console.log("sending message", $scope.message);
+        $scope.peerConnection.send($scope.message);
+        $scope.message = "";
     };
 
     $scope.video = function() {
         var videoConstraints = {
-            mandatory : {
-                chromeMediaSource : 'screen',
-                maxWidth: 1920,
-                maxHeight: 1200
-            },
             optional : []
         };
 
