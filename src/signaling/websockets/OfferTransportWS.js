@@ -23,7 +23,7 @@ angular.module("now.rtc").factory("OfferTransport", function($q, RTCOffer) {
                 }
             });
 
-            this.socket.emit("request", {
+            this.socket.emit("peer", {
                 initiator: configuration.initiator,
                 data: configuration.localDescription,
                 user: "my_user",
@@ -34,12 +34,19 @@ angular.module("now.rtc").factory("OfferTransport", function($q, RTCOffer) {
         },
 
         listen: function(listener) {
+            var that = this;
             this.socket.emit("listen", {
                 userID: this.sessionID
             });
 
+            this.socket.on('peer', function(data) {
+                that.socket.emit('peer_response', data);
+                listener(data);
+            })
+        },
 
-            this.socket.on('request', (function (offer) {
+        onOffer: function(listener) {
+            this.socket.on('offer', (function (offer) {
                 listener(new RTCOffer({
                     offer: offer,
                     transport: this.socket
@@ -48,14 +55,6 @@ angular.module("now.rtc").factory("OfferTransport", function($q, RTCOffer) {
         },
 
         close: function() {
-            var self = this;
-            Object.keys(this.signalProcessors).forEach(function (name) {
-                var t = self.get(name);
-                t.off('value', self.signalProcessors[name]);
-            });
-
-            Firebase.goOffline();
-            this.signalProcessors = {};
         }
     };
 

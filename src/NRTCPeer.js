@@ -15,7 +15,7 @@ angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q) {
     NRTCPeer.prototype = {
         send: function(message) {
             console.log(this.dataChannel);
-            this.dataChannel.send(message)
+            this.peerConnection.dataChannel.send(message)
         },
 
         addStream: function(stream) {
@@ -31,8 +31,10 @@ angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q) {
             dataChannel.onopen = function(evt) { console.log("opening channel", evt); };
             dataChannel.onclose = function() { console.log("channel closing") };
             dataChannel.onerror = function(event) { console.log("channel error:", event); };
-            dataChannel.onmessage = function(event) { $rootScope.$apply(function() {})};
-            this.dataChannel = dataChannel;
+            dataChannel.onmessage = function(event) { $rootScope.$apply(function(a,b,c) {
+                console.log(a, b, c)
+            })};
+            this.peerConnection.dataChannel = dataChannel;
             return dataChannel;
         },
 

@@ -12,10 +12,12 @@ angular.module("now.rtc").factory("NRTCPeerActions", function($q, NRTCSessionDes
     }
 
     function setRemoteDescription(data) {
+        console.log("setting remote description")
         return defer(data, "setRemoteDescription", angular.noop, "remoteDescription");
     }
 
     function setLocalDescription(data) {
+        console.log("setting local description")
         return defer(data, "setLocalDescription", angular.noop, "localDescription");
     }
 

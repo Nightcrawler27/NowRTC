@@ -12,7 +12,7 @@ angular.module("now.rtc").factory("NRTCPeerConnection", function() {
         },
 
         bind: function(event, fn) {
-            this.peerConnection[event] = fn;
+            this.peerConnection[event] = fn.bind(this);
         },
 
         trigger: function(event, data) {

@@ -12,6 +12,9 @@ angular.module("foo", ["now.rtc"]).controller("ChatTest", function($scope, NRTCP
         peerFactory.listen(function(peer) {
             $scope.peerConnection = peer;
             $scope.peerConnection.onStream(function(evt){
+                if($scope.remoteStream)
+                    return;
+
                 attachMediaStream($("#remote")[0], evt.stream);
                 $scope.remoteStream = evt.stream;
             })
