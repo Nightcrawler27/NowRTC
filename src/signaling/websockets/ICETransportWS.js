@@ -1,4 +1,4 @@
-angular.module("now.rtc").factory("ICETransport", function($timeout) {
+angular.module("now.rtc").factory("ICETransport", function() {
     'use strict';
 
     function ICETransportWS(url) {
@@ -28,7 +28,7 @@ angular.module("now.rtc").factory("ICETransport", function($timeout) {
             console.log("watch for ice candidates from", type);
             this.socket.on("ice_candidate", function(item) {
                 if(item.key === key) {
-                    console.log("remote ice candidate", item) ;
+                    console.log("remote ice candidate");
                     callback(new RTCIceCandidate(item));
                 }
             });

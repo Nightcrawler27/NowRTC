@@ -3,7 +3,7 @@ var Q = require("q");
 exports.fromPeerRequest = function(data) {
     var deferredOffer = Q.defer();
     var deferredResponse = Q.defer();
-    var deferredAgreement = Q.defer();
+    var deferredAgreement = Q.defer().promise;
 
     var conversation = {
         data: data,
@@ -15,8 +15,7 @@ exports.fromPeerRequest = function(data) {
         setOffer: function(offer) {
             deferredOffer = Q.defer();
             deferredResponse = Q.defer();
-            deferredAgreement.reject("Agreement ended");
-            deferredAgreement = Q.all([deferredOffer, deferredHandshake]);
+            deferredAgreement = Q.all([deferredOffer.promise, deferredResponse.promise]);
 
             deferredOffer.resolve(offer);
         },
@@ -34,7 +33,7 @@ exports.fromPeerRequest = function(data) {
         }
     };
 
-    var deferredHandshake = Q.all([conversation.initiatorSocket, conversation.receiverSocket]);
+    var deferredHandshake = Q.all([conversation.initiatorSocket.promise, conversation.receiverSocket.promise]);
 
     return conversation;
 };

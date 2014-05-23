@@ -21,16 +21,28 @@
     </head>
     <body ng-app="foo">
         <div ng-controller="ChatTest">
-            <button ng-click="start()">Start</button>
-            <button ng-click="listen()">Listen</button>
+            Me:<input ng-model="me"/><br>
+            To:<input ng-model="to"/><br>
+            <button ng-click="start()">Connect</button>
             <button ng-click="video()">Video</button>
             <div>
                 <input ng-model="message" />
-                <button ng-click="sendMessage()">Message</button>
+                <button ng-click="sendMessage(to, message)">Message</button>
             </div>
             <div>
                 <video id="local" autoplay></video>
                 <video id="remote" autoplay></video>
+            </div>
+            Active User: {{activeUser}}<br />
+            Peers:
+            <span ng-repeat="peer in getPeers()" ng-click="setActiveTab(peer.getUserName())">Name: {{peer.getUserName()}}</span>
+            <div ng-repeat="peer in getPeers()" ng-show="peer.getUserName() == activeUser">
+                <input ng-model="peer.currentMessage" />
+                <button ng-click="sendMessage(peer.getUserName(), peer.currentMessage)">Message</button>
+                Messages:
+                <ul>
+                    <li ng-repeat="message in peer.getMessages()">{{message}}</li>
+                </ul>
             </div>
         </div>
     </body>

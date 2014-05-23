@@ -1,47 +1,77 @@
-angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q) {
+angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q, NRTCPeerConnectionBindings, NRTCPeerActions, NRTCSessionDescription, NRTCDataChannel) {
     "use strict";
-    function NRTCPeer(peerConnection, constraints) {
-        this.peerConnection = peerConnection;
-        this.messages = [];
-        this.constraints = angular.extend({
-            optional : [],
-            mandatory : {
-                OfferToReceiveAudio : true,
-                OfferToReceiveVideo : true
-            }
-        }, constraints);
-    }
 
-    NRTCPeer.prototype = {
-        send: function(message) {
-            console.log(this.dataChannel);
-            this.peerConnection.dataChannel.send(message)
-        },
+    return function(peerConfiguration) {
+        var messages = [];
+        var dataChannelPromise;
 
-        addStream: function(stream) {
-            this.peerConnection.addStream(stream);
-        },
+        peerConfiguration.offerChannel.handshake(peerConfiguration);
+        peerConfiguration.offerChannel.onOffer(function(offer) {
+            peerConfiguration.remoteDescription = new NRTCSessionDescription(offer.value.offer);
+            peerConfiguration.offer = offer;
+            NRTCPeerActions.receive(peerConfiguration);
+        });
 
-        onStream: function(callback) {
-            this.peerConnection.bind("onaddstream", callback);
-        },
+        NRTCPeerConnectionBindings.bind(peerConfiguration);
 
-        createDataChannel: function() {
-            var dataChannel = this.peerConnection.createDataChannel("chat");
-            dataChannel.onopen = function(evt) { console.log("opening channel", evt); };
+        peerConfiguration.peerConnection.bind("ondatachannel", function (event) {
+            console.log("data channel");
+            var channel = new NRTCDataChannel(event.channel);
+            peerConfiguration.peerConnection.dataChannel = channel;
+            var deferred = $q.defer();
+            dataChannelPromise  = deferred.promise;
+            channel.bind("onmessage", function(event) {
+                $rootScope.$apply(function () {
+                    console.log("Got message: ", event.data);
+                    messages.push(event.data)
+                })
+            });
+            deferred.resolve(channel)
+        });
+
+        function getDataChannel() {
+            if(dataChannelPromise)
+                return dataChannelPromise;
+
+            var deferred = $q.defer();
+            dataChannelPromise  = deferred.promise;
+            var dataChannel = peerConfiguration.peerConnection.createDataChannel("chat");
+            dataChannel.onopen = function() { deferred.resolve(dataChannel) };
             dataChannel.onclose = function() { console.log("channel closing") };
             dataChannel.onerror = function(event) { console.log("channel error:", event); };
-            dataChannel.onmessage = function(event) { $rootScope.$apply(function(a,b,c) {
-                console.log(a, b, c)
+            dataChannel.onmessage = function(event) { $rootScope.$apply(function() {
+                console.log("Got message: ", event.data);
+                messages.push(event.data)
             })};
-            this.peerConnection.dataChannel = dataChannel;
-            return dataChannel;
-        },
 
-        isConnected: function() {
-            return this.connected || this.connecting
+            return dataChannelPromise;
+        }
+
+        return {
+            send: function(message) {
+                getDataChannel().then(function(dataChannel) {
+                    console.log("sending message", message);
+                    dataChannel.send(message);
+                }, function() {
+                    console.log("error sending message");
+                })
+            },
+
+            addStream: function(stream) {
+                this.peerConnection.addStream(stream);
+            },
+
+            isConnected: function() {
+                return this.connected || this.connecting
+            },
+
+            getUserName: function() {
+                return peerConfiguration.targetUser;
+            },
+
+            getMessages: function() {
+                return messages;
+            }
         }
     };
-
-    return NRTCPeer;
 });

@@ -1,62 +1,39 @@
-angular.module("now.rtc").factory("NRTCPeerFactory", function($q, NRTCPeer, NRTCPeerActions, NRTCSessionDescription, NRTCPeerConnection, NRTCPeerConnectionBindings) {
-    var configuration = {"iceServers":[{"url":"stun:23.21.150.121"}]};
+angular.module("now.rtc").factory("NRTCPeerFactory", function(NRTCPeer, NRTCPeerConnection) {
+    return function(me, offerChannel, iceChannel) {
+        var peers = {};
 
-    function NRTCPeerFactory(offerChannel, iceChannel) {
-        this.offerChannel = offerChannel;
-        this.iceChannel = iceChannel;
-    }
+        function getPeerConfiguration(user, key) {
+            return {
+                peerConnection: new NRTCPeerConnection({"iceServers":[{"url":"stun:23.21.150.121"}]}),
+                iceChannel: iceChannel,
+                offerChannel: offerChannel,
+                targetUser: user,
+                key: key
+            };
+        }
 
-    function getPeerConfiguration(peerFactory, user, key, initiator) {
         return {
-            peerConnection: new NRTCPeerConnection(configuration),
-            iceChannel: peerFactory.iceChannel,
-            offerChannel: peerFactory.offerChannel,
-            targetUser: user,
-            key: key,
-            initiator: initiator
-        };
-    }
+            getPeer: function(user) {
+                if(peers[user])
+                    return peers[user];
 
-    NRTCPeerFactory.prototype =  {
-        initiate: function(key, streams, user) {
-            var peerConfiguration = getPeerConfiguration(this, user, key, true);
+                peers[user] = NRTCPeer(getPeerConfiguration(user, Math.random()));
 
-            NRTCPeerConnectionBindings.bind(peerConfiguration);
-            NRTCPeerActions.initiate(peerConfiguration);
-            this.offerChannel.onOffer(function(offer) {
-                console.log("incoming offer");
-                peerConfiguration.remoteDescription = new NRTCSessionDescription(offer.value.data);
-                peerConfiguration.offer = offer;
+                return peers[user];
+            },
 
-                NRTCPeerConnectionBindings.bind(peerConfiguration);
-                NRTCPeerActions.receive(peerConfiguration);
-            });
+            listen: function(callback) {
+                offerChannel.listen(function(offer) {
+                    console.log("peer request from", offer.user);
+                    var peer = NRTCPeer(getPeerConfiguration(offer.from, offer.key));
+                    peers[offer.from] = peer;
+                    callback(peer);
+                })
+            },
 
-            angular.forEach(streams, peerConfiguration.peerConnection.addStream);
-
-            return new NRTCPeer(peerConfiguration.peerConnection);
-        },
-
-        listen: function(onOffer) {
-            this.offerChannel.listen(function(offer) {
-                var peer = this.fromPeer(offer);
-                onOffer(peer);
-            }.bind(this))
-        },
-
-        fromPeer: function(peer) {
-            var peerConfiguration = getPeerConfiguration(this, "", peer.key, false);
-            this.offerChannel.onOffer(function(offer) {
-                peerConfiguration.remoteDescription = new NRTCSessionDescription(offer.value.data);
-                peerConfiguration.offer = offer;
-
-                NRTCPeerConnectionBindings.bind(peerConfiguration);
-                NRTCPeerActions.receive(peerConfiguration);
-            });
-
-            return new NRTCPeer(peerConfiguration.peerConnection);
+            getPeers: function() {
+                return peers;
+            }
         }
     };
-
-    return NRTCPeerFactory;
 });

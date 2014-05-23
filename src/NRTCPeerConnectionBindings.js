@@ -14,24 +14,13 @@ angular.module("now.rtc").factory("NRTCPeerConnectionBindings", function(NRTCDat
                 if (!event.candidate)
                     return;
 
-                payload.iceChannel.addCandidate(payload.key, payload.initiator ? "initiator" : "receiver", event.candidate);
-            });
-
-            payload.peerConnection.bind("ondatachannel", function (event) {
-                console.log("data channel");
-                var channel = new NRTCDataChannel(event.channel);
-                payload.peerConnection.dataChannel = channel;
-                channel.bind("onmessage", function (a, b, c) {
-                    console.log(a, b, c)
-                });
+                payload.iceChannel.addCandidate(payload.key, "to:" + payload.targetUser, event.candidate);
             });
 
             payload.peerConnection.bind("oniceconnectionstatechange", function (event) {
                 console.log("iceConnectionStateChange");
                 console.log('>>> IceConnectionStateChanged to ' + event.target.iceConnectionState, event);
             });
-
-            //angular.extend(payload.peerConnection, actions);
 
             payload.peerConnection.bind("onnegotiationneeded", function () {
                 console.log("Negotiation needed");

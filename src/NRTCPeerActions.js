@@ -12,19 +12,25 @@ angular.module("now.rtc").factory("NRTCPeerActions", function($q, NRTCSessionDes
     }
 
     function setRemoteDescription(data) {
-        console.log("setting remote description")
-        return defer(data, "setRemoteDescription", angular.noop, "remoteDescription");
+        console.log("setting remote description");
+        return defer(data, "setRemoteDescription", function() {
+            data.deferredRemoteDescription.resolve()
+        }, "remoteDescription");
     }
 
     function setLocalDescription(data) {
-        console.log("setting local description")
-        return defer(data, "setLocalDescription", angular.noop, "localDescription");
+        console.log("setting local description");
+        return defer(data, "setLocalDescription", function() {
+            data.deferredLocalDescription.resolve()
+        },  "localDescription");
     }
 
     function defer(data, methodName, callback, dataMember) {
         var deferred = $q.defer();
-        var errorHandler = deferred.reject.bind(deferred);
-        var fnArgs = [wrappedCallback, errorHandler];
+        var fnArgs = [wrappedCallback, function(err) {
+            console.log("********** Error", err);
+            deferred.reject(err)
+        }];
 
         if(dataMember)
             fnArgs.unshift(data[dataMember]);
@@ -45,33 +51,43 @@ angular.module("now.rtc").factory("NRTCPeerActions", function($q, NRTCSessionDes
     }
 
     function setupICEWatcher(peerConfiguration) {
-        var type = peerConfiguration.initiator ? "receiver" : "initiator";
         var callback = peerConfiguration.peerConnection.addIceCandidate.bind(peerConfiguration.peerConnection);
-        peerConfiguration.iceChannel.onCandidate(peerConfiguration.key, type, callback)
+        var deferredRemoteDescription = $q.defer();
+        var deferredLocalDescription = $q.defer();
+        peerConfiguration.deferredRemoteDescription = deferredRemoteDescription;
+        peerConfiguration.deferredLocalDescription = deferredLocalDescription;
+        peerConfiguration.iceChannel.onCandidate(peerConfiguration.key, "", function(candidate) {
+            $q.all([deferredRemoteDescription.promise, deferredLocalDescription]).then(function() {
+                console.log("remote candidate", candidate);
+                callback(candidate)
+            })
+        });
+        return $q.when(peerConfiguration);
     }
 
     function onError(error) {
-        console.log(error);
+        console.log("**********************", error);
     }
 
     return {
         initiate: setupICEWatcher,
 
         renegotiate: function(peerConfiguration) {
-            var initiateOffer = peerConfiguration.offerChannel.initiate.bind(peerConfiguration.offerChannel);
-            return createOffer(peerConfiguration)
-                .then(setLocalDescription)
-                .then(initiateOffer)
-                .then(setRemoteDescription)
+            var initiateOffer = peerConfiguration.offerChannel.createOffer.bind(peerConfiguration.offerChannel);
+            return setupICEWatcher(peerConfiguration)
+                .then(createOffer, onError)
+                .then(setLocalDescription, onError)
+                .then(initiateOffer, onError)
+                .then(setRemoteDescription, onError)
                 .then(null, onError);
         },
 
         receive: function(peerConfiguration) {
-            return setRemoteDescription(peerConfiguration)
+            return setupICEWatcher(peerConfiguration)
+                .then(setRemoteDescription)
                 .then(createAnswer)
                 .then(setLocalDescription)
                 .then(acceptRemoteOffer)
-                .then(setupICEWatcher)
                 .then(null, onError);
         }
     }

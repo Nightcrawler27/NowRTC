@@ -19,26 +19,27 @@ server.listen(3000);
 
 ioListener.on('connection', function (socket) {
     socket.on('listen', function(data) {
-        var userID = data.userID;
-        listeners[userID] = listeners[userID] || [];
-        listeners[userID].push(socket);
+        console.log("user " + data.userID + " can accept peer request");
+        listeners[data.userID] = socket;
     });
 
     socket.on('peer', function (data) {
-        listeners[data.user] = listeners[data.user] || [];
-
-        var conversation = Conversation.fromPeerRequest(data);
-        conversation.initiatorSocket.resolve(socket);
-        chatRequests[data.key] = conversation;
-
-        listeners[data.user].forEach(function(listener) {
-            listener.emit('peer', data);
-        });
-    });
-
-    socket.on('peer_response', function(data) {
         var conversation = chatRequests[data.key];
-        conversation.receiverSocket.resolve(socket);
+        if(conversation) {
+            console.log("Completing existing peer handshake");
+            conversation.receiverSocket.resolve(socket);
+        } else {
+            console.log("Creating new peer handshake");
+            conversation = Conversation.fromPeerRequest(data);
+            conversation.initiatorSocket.resolve(socket);
+            chatRequests[data.key] = conversation;
+            if(listeners[data.user]) {
+                console.log("Sending handshake from " + data.from + " to " + data.user);
+                listeners[data.user].emit('peer', data);
+            } else {
+                console.log("could not find listener for " + data.user);
+            }
+        }
     });
 
     socket.on('offer', function(data) {
@@ -46,11 +47,14 @@ ioListener.on('connection', function (socket) {
         conversation.getHandshake().then(function(sockets) {
             data.timestamp = new Date().getTime();
             var targetSocket = (socket === sockets[0]) ? sockets[1] : sockets[0];
-            conversation.setOffer(data);
+            conversation.setOffer(data.offer);
             conversation.getResponse().then(function(response) {
                 socket.emit("offer_response", response);
             });
+
             targetSocket.emit("offer", data);
+        }).then(function() {}, function(err) {
+            console.log(err)
         })
     });
 
@@ -69,18 +73,12 @@ ioListener.on('connection', function (socket) {
     });
 
     socket.on('ice_candidate', function (data) {
-        var socketPromise;
+        console.log("ice candidate");
         var conversation = chatRequests[data.key];
 
-        if(data.sender === "initiator")
-            socketPromise = conversation.receiverSocket;
-        else
-            socketPromise = conversation.initiatorSocket;
-
-        conversation.getAgreement().then(function(){
-            socketPromise.then(function(targetSocket) {
-                targetSocket.emit("ice_candidate", data);
-            })
+        Q.all([conversation.getHandshake(), conversation.getAgreement()]).then(function(test) {
+            var targetSocket = test[0][0] === socket ? test[0][1] : test[0][0];
+            targetSocket.emit("ice_candidate", data);
         });
     })
 });

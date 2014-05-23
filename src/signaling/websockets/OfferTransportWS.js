@@ -1,4 +1,4 @@
-angular.module("now.rtc").factory("OfferTransport", function($q, RTCOffer) {
+angular.module("now.rtc").factory("OfferTransport", function($q, RTCOffer, NRTCSessionDescription) {
     "use strict";
 
     function NRTCRequestTransportFB(url, sessionID) {
@@ -7,42 +7,40 @@ angular.module("now.rtc").factory("OfferTransport", function($q, RTCOffer) {
     }
 
     NRTCRequestTransportFB.prototype = {
-        initiate: function(configuration) {
-            var deferred = $q.defer();
-
-            this.socket.on("response", function(data) {
-                console.log("request response");
-                if(data.key !== configuration.key)
-                    return;
-
-                if(data.state === "accepted") {
-                    configuration.remoteDescription = new RTCSessionDescription(data.response);
-                    deferred.resolve(configuration);
-                } else {
-                    deferred.reject();
-                }
-            });
-
+        handshake: function(configuration) {
             this.socket.emit("peer", {
-                initiator: configuration.initiator,
-                data: configuration.localDescription,
-                user: "my_user",
+                user: configuration.targetUser,
+                from: this.sessionID,
                 key: configuration.key
             });
-
-            return deferred.promise;
         },
 
         listen: function(listener) {
-            var that = this;
             this.socket.emit("listen", {
                 userID: this.sessionID
             });
 
             this.socket.on('peer', function(data) {
-                that.socket.emit('peer_response', data);
                 listener(data);
             })
+        },
+
+        createOffer: function(configuration) {
+            var deferred = $q.defer();
+            this.socket.emit("offer", {
+                offer: configuration.localDescription,
+                key: configuration.key
+            });
+
+            this.socket.on('offer_response', (function (data) {
+                if(data.key !== configuration.key)
+                    return;
+
+                configuration.remoteDescription = new NRTCSessionDescription(data.response);
+                deferred.resolve(configuration);
+            }).bind(this));
+
+            return deferred.promise;
         },
 
         onOffer: function(listener) {

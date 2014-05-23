@@ -13,7 +13,7 @@ angular.module("now.rtc").factory("RTCOffer", function() {
                 throw "Request has already been " + this.value.state;
 
             this.value.state = "accepted";
-            this.offer.transport.emit("response", {
+            this.offer.transport.emit("offer_response", {
                 response: response,
                 key: this.offer.offer.key,
                 state: "accepted"

@@ -1,30 +1,40 @@
 angular.module("foo", ["now.rtc"]).controller("ChatTest", function($scope, NRTCPeerFactory, ICETransport, OfferTransport) {
-    var iceChannel = new ICETransport("http://localhost:3000", "my_user");
-    var requestChannel = new OfferTransport("http://localhost:3000", "my_user");
-    var peerFactory = new NRTCPeerFactory(requestChannel, iceChannel);
+    var iceChannel;
+    var requestChannel;
+    var peerFactory;
+
+    $scope.activeUser = "foo";
+
+    $scope.peers = [];
 
     $scope.start = function() {
-        $scope.peerConnection = peerFactory.initiate("my_key", [], "my_user");
-        $scope.dataChannel = $scope.peerConnection.createDataChannel();
-    };
-
-    $scope.listen = function() {
+        iceChannel =  new ICETransport("http://localhost:3000", $scope.me);
+        requestChannel = new OfferTransport("http://localhost:3000", $scope.me);
+        peerFactory = NRTCPeerFactory($scope.me, requestChannel, iceChannel);
         peerFactory.listen(function(peer) {
-            $scope.peerConnection = peer;
-            $scope.peerConnection.onStream(function(evt){
-                if($scope.remoteStream)
-                    return;
-
-                attachMediaStream($("#remote")[0], evt.stream);
-                $scope.remoteStream = evt.stream;
-            })
+            $scope.$apply(function() {
+                console.log("new peer:", peer);
+                $scope.peers.push(peer);
+            });
         });
     };
 
-    $scope.sendMessage = function() {
-        console.log("sending message", $scope.message);
-        $scope.peerConnection.send($scope.message);
-        $scope.message = "";
+    $scope.setActiveTab = function(user) {
+        console.log(user);
+        $scope.activeUser = user;
+    };
+
+    $scope.getPeers = function() {
+        if(peerFactory)
+            return peerFactory.getPeers();
+        else
+            return [];
+    };
+
+    $scope.sendMessage = function(user, message) {
+        console.log("sending message", message, "to", user);
+        var peer = peerFactory.getPeer(user);
+        peer.send(message);
     };
 
     $scope.video = function() {
@@ -42,7 +52,6 @@ angular.module("foo", ["now.rtc"]).controller("ChatTest", function($scope, NRTCP
     function gotVideo(stream) {
         $scope.$apply(function() {
             $scope.localStream = stream;
-            // attach to the local view
             attachMediaStream($("#local")[0], stream);
             $scope.peerConnection.addStream(stream);
         });
