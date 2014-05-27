@@ -1,7 +1,7 @@
 <html>
     <head>
-        <script src="../vendor/angular/angular.js"></script>
         <script src="../vendor/jquery/dist/jquery.js"></script>
+        <script src="../vendor/angular/angular.js"></script>
         <script src="../lib/adapter.js"></script>
         <script src="../vendor/firebase/firebase.js"></script>
         <script src="../src/_nowRTC.js"></script>
@@ -18,31 +18,40 @@
         <script src="../src/NRTCPeerFactory.js"></script>
         <script src="../vendor/socket.io-client/dist/socket.io.js"></script>
         <script src="script/test.js"></script>
+        <link rel="stylesheet" type="text/css" href="style/test.css">
     </head>
-    <body ng-app="foo">
-        <div ng-controller="ChatTest">
-            Me:<input ng-model="me"/><br>
-            To:<input ng-model="to"/><br>
-            <button ng-click="start()">Connect</button>
-            <button ng-click="video()">Video</button>
-            <div>
-                <input ng-model="message" />
-                <button ng-click="sendMessage(to, message)">Message</button>
+    <body ng-app="foo" ng-cloak>
+        <div ng-controller="ChatTest" class="chat-main">
+            <div class="login" ng-show="!isOnline()">
+                <form ng-submit="start()">
+                    Name<input ng-model="me"/><br/>
+                    <button class="go-online" ng-show="!isOnline()">Go Online</button>
+                </form>
             </div>
-            <div>
-                <video id="local" autoplay></video>
-                <video id="remote" autoplay></video>
-            </div>
-            Active User: {{activeUser}}<br />
-            Peers:
-            <span ng-repeat="peer in getPeers()" ng-click="setActiveTab(peer.getUserName())">Name: {{peer.getUserName()}}</span>
-            <div ng-repeat="peer in getPeers()" ng-show="peer.getUserName() == activeUser">
-                <input ng-model="peer.currentMessage" />
-                <button ng-click="sendMessage(peer.getUserName(), peer.currentMessage)">Message</button>
-                Messages:
-                <ul>
-                    <li ng-repeat="message in peer.getMessages()">{{message}}</li>
-                </ul>
+            <div class="peer-container" ng-show="isOnline()">
+                <div class="peer-list-container">
+                    <div class="users-header">Users</div>
+                    <a href="javascript:void(0)"
+                       ng-repeat="user in requestChannel.users"
+                       ng-click="setActiveUser(user)"
+                       ng-class="{active: isActiveUser(user)}">{{user}}</a>
+                </div>
+                <div class="peer-tab-container" ng-show="activeUser">
+                    <div class="messages">
+                        Messages from {{currentPeer.getUserName()}}
+                        <ul>
+                            <li ng-repeat="message in currentPeer.getMessages()">{{message}}</li>
+                        </ul>
+                    </div>
+                    <div class="message-controls">
+                        <div class="message-input-wrapper">
+                            <input ng-model="currentPeer.newMessage" />
+                        </div>
+                        <div class="send-button-wrapper">
+                            <button ng-click="sendMessage(currentPeer.getUserName(), currentPeer.newMessage)">Message</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </body>

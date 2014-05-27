@@ -2,8 +2,10 @@ angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q, NRTCPeerC
     "use strict";
 
     return function(peerConfiguration) {
-        var messages = [];
+        console.log("creating peer");
+        var messages = [peerConfiguration.targetUser];
         var dataChannelPromise;
+        var unreadMessages = 0;
 
         peerConfiguration.offerChannel.handshake(peerConfiguration);
         peerConfiguration.offerChannel.onOffer(function(offer) {
@@ -41,7 +43,8 @@ angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q, NRTCPeerC
             dataChannel.onerror = function(event) { console.log("channel error:", event); };
             dataChannel.onmessage = function(event) { $rootScope.$apply(function() {
                 console.log("Got message: ", event.data);
-                messages.push(event.data)
+                messages.push(event.data);
+                unreadMessages++;
             })};
 
             return dataChannelPromise;
@@ -57,12 +60,16 @@ angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q, NRTCPeerC
                 })
             },
 
+            readMessages: function() {
+                unreadMessages = 0;
+            },
+
             addStream: function(stream) {
-                this.peerConnection.addStream(stream);
+                peerConnection.addStream(stream);
             },
 
             isConnected: function() {
-                return this.connected || this.connecting
+                return connected || connecting;
             },
 
             getUserName: function() {

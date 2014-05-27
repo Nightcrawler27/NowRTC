@@ -1,4 +1,4 @@
-angular.module("now.rtc").factory("NRTCPeerFactory", function(NRTCPeer, NRTCPeerConnection) {
+angular.module("now.rtc").factory("NRTCPeerFactory", function($rootScope, NRTCPeer, NRTCPeerConnection) {
     return function(me, offerChannel, iceChannel) {
         var peers = {};
 
@@ -27,12 +27,18 @@ angular.module("now.rtc").factory("NRTCPeerFactory", function(NRTCPeer, NRTCPeer
                     console.log("peer request from", offer.user);
                     var peer = NRTCPeer(getPeerConfiguration(offer.from, offer.key));
                     peers[offer.from] = peer;
-                    callback(peer);
+                    $rootScope.$apply(function() {
+                        callback(peer);
+                    });
                 })
             },
 
             getPeers: function() {
                 return peers;
+            },
+
+            isOnline: function() {
+                return offerChannel.isOnline();
             }
         }
     };

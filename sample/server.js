@@ -20,6 +20,12 @@ server.listen(3000);
 ioListener.on('connection', function (socket) {
     socket.on('listen', function(data) {
         console.log("user " + data.userID + " can accept peer request");
+        Object.keys(listeners).forEach(function(key) {
+            console.log("notifying user " + key + " of new user");
+            listeners[key].emit("new_user", [data.userID]);
+        });
+
+        socket.emit("new_user", Object.keys(listeners));
         listeners[data.userID] = socket;
     });
 

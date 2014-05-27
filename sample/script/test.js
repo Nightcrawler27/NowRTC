@@ -1,34 +1,33 @@
 angular.module("foo", ["now.rtc"]).controller("ChatTest", function($scope, NRTCPeerFactory, ICETransport, OfferTransport) {
+    var HOST = "http://localhost:3000";
     var iceChannel;
-    var requestChannel;
     var peerFactory;
-
-    $scope.activeUser = "foo";
-
     $scope.peers = [];
 
     $scope.start = function() {
-        iceChannel =  new ICETransport("http://localhost:3000", $scope.me);
-        requestChannel = new OfferTransport("http://localhost:3000", $scope.me);
-        peerFactory = NRTCPeerFactory($scope.me, requestChannel, iceChannel);
+        iceChannel =  new ICETransport(HOST, $scope.me);
+        $scope.requestChannel = new OfferTransport(HOST, $scope.me);
+        peerFactory = NRTCPeerFactory($scope.me, $scope.requestChannel, iceChannel);
         peerFactory.listen(function(peer) {
-            $scope.$apply(function() {
-                console.log("new peer:", peer);
-                $scope.peers.push(peer);
-            });
+            $scope.peers.push(peer)
         });
     };
 
-    $scope.setActiveTab = function(user) {
-        console.log(user);
-        $scope.activeUser = user;
+    $scope.isOnline = function() {
+        return peerFactory && peerFactory.isOnline();
     };
 
+    $scope.setActiveUser = function(user) {
+        $scope.activeUser = user;
+        $scope.currentPeer = peerFactory.getPeer(user);
+    };
+
+    $scope.isActiveUser = function(user) {
+        return user === $scope.activeUser;
+    }
+
     $scope.getPeers = function() {
-        if(peerFactory)
-            return peerFactory.getPeers();
-        else
-            return [];
+        return peerFactory ? peerFactory.getPeers() : [];
     };
 
     $scope.sendMessage = function(user, message) {
@@ -38,22 +37,18 @@ angular.module("foo", ["now.rtc"]).controller("ChatTest", function($scope, NRTCP
     };
 
     $scope.video = function() {
-        var videoConstraints = {
-            optional : []
-        };
-
         getUserMedia({
-            video : videoConstraints
-        }, gotVideo, function(a,b,c) {
-            console.log(a,b,c)
+            video : {
+                optional : []
+            }
+        }, function(stream) {
+            $scope.$apply(function() {
+                $scope.localStream = stream;
+                attachMediaStream($("#local")[0], stream);
+                $scope.peerConnection.addStream(stream);
+            });
+        }, function(err) {
+            console.log(err)
         });
     };
-
-    function gotVideo(stream) {
-        $scope.$apply(function() {
-            $scope.localStream = stream;
-            attachMediaStream($("#local")[0], stream);
-            $scope.peerConnection.addStream(stream);
-        });
-    }
 });

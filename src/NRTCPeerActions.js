@@ -75,10 +75,10 @@ angular.module("now.rtc").factory("NRTCPeerActions", function($q, NRTCSessionDes
         renegotiate: function(peerConfiguration) {
             var initiateOffer = peerConfiguration.offerChannel.createOffer.bind(peerConfiguration.offerChannel);
             return setupICEWatcher(peerConfiguration)
-                .then(createOffer, onError)
-                .then(setLocalDescription, onError)
-                .then(initiateOffer, onError)
-                .then(setRemoteDescription, onError)
+                .then(createOffer)
+                .then(setLocalDescription)
+                .then(initiateOffer)
+                .then(setRemoteDescription)
                 .then(null, onError);
         },
 
