@@ -30,7 +30,7 @@
             </div>
             <div class="peer-container" ng-show="isOnline()">
                 <div class="peer-list-container">
-                    <div class="users-header">Users</div>
+                    <div class="users-header">{{me}}'s contacts</div>
                     <a href="javascript:void(0)"
                        ng-repeat="user in requestChannel.users"
                        ng-click="setActiveUser(user)"
@@ -38,9 +38,8 @@
                 </div>
                 <div class="peer-tab-container" ng-show="activeUser">
                     <div class="messages">
-                        Messages from {{currentPeer.getUserName()}}
                         <ul>
-                            <li ng-repeat="message in currentPeer.getMessages()">{{message}}</li>
+                            <li ng-repeat="message in currentPeer.getMessages()">{{message.message}}</li>
                         </ul>
                     </div>
                     <div class="message-controls">
@@ -49,6 +48,8 @@
                         </div>
                         <div class="send-button-wrapper">
                             <button ng-click="sendMessage(currentPeer.getUserName(), currentPeer.newMessage)">Message</button>
+                            <button ng-click="shareCamera()">Video</button>
+                            <button ng-click="shareScreen()">Screen</button>
                         </div>
                     </div>
                 </div>

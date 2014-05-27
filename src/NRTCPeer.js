@@ -3,7 +3,7 @@ angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q, NRTCPeerC
 
     return function(peerConfiguration) {
         console.log("creating peer");
-        var messages = [peerConfiguration.targetUser];
+        var messages = [];
         var dataChannelPromise;
         var unreadMessages = 0;
 
@@ -22,12 +22,7 @@ angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q, NRTCPeerC
             peerConfiguration.peerConnection.dataChannel = channel;
             var deferred = $q.defer();
             dataChannelPromise  = deferred.promise;
-            channel.bind("onmessage", function(event) {
-                $rootScope.$apply(function () {
-                    console.log("Got message: ", event.data);
-                    messages.push(event.data)
-                })
-            });
+            channel.bind("onmessage", onMessage);
             deferred.resolve(channel)
         });
 
@@ -41,13 +36,20 @@ angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q, NRTCPeerC
             dataChannel.onopen = function() { deferred.resolve(dataChannel) };
             dataChannel.onclose = function() { console.log("channel closing") };
             dataChannel.onerror = function(event) { console.log("channel error:", event); };
-            dataChannel.onmessage = function(event) { $rootScope.$apply(function() {
-                console.log("Got message: ", event.data);
-                messages.push(event.data);
-                unreadMessages++;
-            })};
+            dataChannel.onmessage = onMessage;
 
             return dataChannelPromise;
+        }
+
+        function onMessage(event) {
+            $rootScope.$apply(function () {
+                console.log("Got message: ", event.data);
+                messages.push({
+                    from: "peer",
+                    message: event.data
+                });
+                unreadMessages++;
+            })
         }
 
         return {
