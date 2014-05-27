@@ -25,7 +25,12 @@ ioListener.on('connection', function (socket) {
             listeners[key].emit("new_user", [data.userID]);
         });
 
-        socket.emit("new_user", Object.keys(listeners));
+        var userList = Object.keys(listeners);
+        userList = userList.filter(function(user) {
+           return user !== data.userID;
+        });
+
+        socket.emit("new_user", userList);
         listeners[data.userID] = socket;
     });
 
