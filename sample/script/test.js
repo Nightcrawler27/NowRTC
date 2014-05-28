@@ -1,5 +1,5 @@
 angular.module("foo", ["now.rtc"]).controller("ChatTest", function($scope, NRTCPeerFactory, ICETransport, OfferTransport) {
-    var HOST = "http://localhost:3000";
+    var HOST = window.location.origin;
     var iceChannel;
     var peerFactory;
     $scope.peers = [];
@@ -36,19 +36,7 @@ angular.module("foo", ["now.rtc"]).controller("ChatTest", function($scope, NRTCP
         peer.send(message);
     };
 
-    $scope.video = function() {
-        getUserMedia({
-            video : {
-                optional : []
-            }
-        }, function(stream) {
-            $scope.$apply(function() {
-                $scope.localStream = stream;
-                attachMediaStream($("#local")[0], stream);
-                $scope.peerConnection.addStream(stream);
-            });
-        }, function(err) {
-            console.log(err)
-        });
+    $scope.shareCamera = function() {
+        $scope.currentPeer.shareCamera();
     };
 });

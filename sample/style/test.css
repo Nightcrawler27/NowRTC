@@ -10,6 +10,7 @@ input, button{
     font-size: 18px;
     border: solid 1px #aaa;
     border-radius: 5px;
+    padding: 3px 2px 2px 2px
 }
 
 .login {
@@ -54,16 +55,21 @@ input, button{
     background-color: #ddd;
 }
 .peer-container {
+    box-sizing: border-box;
     position: relative;
     flex-flow: row;
     display: flex;
     height: 100%;
-    border-bottom: solid 1px black;
+    border-radius: 10px;
+    border: solid 1px #aaa;
+    margin: 10px;
 }
 
 .peer-list-container {
     width: 200px;
     background-color: #eee;
+    display: flex;
+    flex-flow: column;
 }
 
 .peer-list-container a {
@@ -92,7 +98,19 @@ input, button{
 }
 
 .messages {
-    flex: 1 0 auto;
+    flex: 1 1 auto;
+    display: flex;
+    flex-flow: row;
+}
+
+.message-list {
+    flex: auto;
+    flex-grow: 1;
+}
+
+.remote-stream-wrapper {
+    flex: auto;
+    flex-grow: 2;
 }
 
 .message-controls {
@@ -111,4 +129,18 @@ input, button{
 
 .send-button-wrapper {
     flex: 0 1 auto;
+}
+
+.user-list {
+    flex: 1 0 auto;
+}
+
+.local-stream-wrapper {
+    flex: 0 1 auto;
+}
+
+.local-stream {
+    box-sizing: border-box;
+    padding: 10px;
+    width: 100%;
 }

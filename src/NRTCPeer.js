@@ -6,6 +6,8 @@ angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q, NRTCPeerC
         var messages = [];
         var dataChannelPromise;
         var unreadMessages = 0;
+        var localStream;
+        var remoteStream;
 
         peerConfiguration.offerChannel.handshake(peerConfiguration);
         peerConfiguration.offerChannel.onOffer(function(offer) {
@@ -15,6 +17,11 @@ angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q, NRTCPeerC
         });
 
         NRTCPeerConnectionBindings.bind(peerConfiguration);
+
+        peerConfiguration.peerConnection.bind("onaddstream", function (event) {
+            console.log("Stream added", event);
+            remoteStream = event.stream;
+        });
 
         peerConfiguration.peerConnection.bind("ondatachannel", function (event) {
             console.log("data channel");
@@ -64,6 +71,27 @@ angular.module("now.rtc").factory("NRTCPeer", function($rootScope, $q, NRTCPeerC
 
             readMessages: function() {
                 unreadMessages = 0;
+            },
+
+            shareCamera: function() {
+                getUserMedia({
+                    video : {
+                        optional : []
+                    }
+                }, function(stream) {
+                    localStream = stream;
+                    peerConfiguration.peerConnection.addStream(stream);
+                }, function(err) {
+                    console.log(err)
+                })
+            },
+
+            getLocalStream: function() {
+                return localStream;
+            },
+
+            getRemoteStream: function() {
+                return remoteStream;
             },
 
             addStream: function(stream) {

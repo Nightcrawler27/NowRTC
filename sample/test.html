@@ -9,6 +9,7 @@
         <script src="../src/NRTCPeerConnection.js"></script>
         <script src="../src/NRTCPeerConnectionBindings.js"></script>
         <script src="../src/NRTCPeerActions.js"></script>
+        <script src="../src/NRTCVideo.js"></script>
         <script src="../src/signaling/websockets/OfferTransportWS.js"></script>
         <script src="../src/signaling/websockets/ICETransportWS.js"></script>
         <script src="../src/signaling/websockets/RTCOfferWS.js"></script>
@@ -31,16 +32,24 @@
             <div class="peer-container" ng-show="isOnline()">
                 <div class="peer-list-container">
                     <div class="users-header">{{me}}'s contacts</div>
-                    <a href="javascript:void(0)"
-                       ng-repeat="user in requestChannel.users"
-                       ng-click="setActiveUser(user)"
-                       ng-class="{active: isActiveUser(user)}">{{user}}</a>
+                    <div class="user-list">
+                        <a href="javascript:void(0)"
+                           ng-repeat="user in requestChannel.users"
+                           ng-click="setActiveUser(user)"
+                           ng-class="{active: isActiveUser(user)}">{{user}}</a>
+                    </div>
+                    <div class="local-stream-wrapper">
+                        <nrtc-video ng-show="currentPeer.getLocalStream()" autoplay stream="currentPeer.getLocalStream()" class="local-stream" />
+                    </div>
                 </div>
                 <div class="peer-tab-container" ng-show="activeUser">
                     <div class="messages">
-                        <ul>
+                        <ul class="message-list">
                             <li ng-repeat="message in currentPeer.getMessages()">{{message.message}}</li>
                         </ul>
+                        <div class="remote-stream-wrapper">
+                            <nrtc-video ng-show="currentPeer.getRemoteStream()" autoplay stream="currentPeer.getRemoteStream()" class="remote-stream" />
+                        </div>
                     </div>
                     <div class="message-controls">
                         <div class="message-input-wrapper">
