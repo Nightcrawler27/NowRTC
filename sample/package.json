@@ -1,0 +1,15 @@
+{
+  "title": "NowRTC Sample",
+  "name": "nowrtc_sample",
+  "description": "NowRTC Sample Implementation",
+  "version": "0.0.1",
+  "author": {
+    "name": "Scott Marshall",
+    "email": "scott.marshall@servicenow.com"
+  },
+  "dependencies": {
+    "connect": "^2.15.0",
+    "socket.io": "^0.9.16",
+    "q": "^1.0.1"
+  }
+}
