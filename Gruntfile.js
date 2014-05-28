@@ -10,21 +10,6 @@ module.exports = function(grunt) {
                 singleRun: true
             }
         },
-        watch: {
-            scripts: {
-                files: [
-                    'src/main/plugins/*/ui.html/scripts/**/*.js'
-                ],
-                tasks: ['karma:unit']
-            },
-            styles: {
-                files: [
-                    'src/**/*.scss',
-                    '../glide/ui.html/styles/**/*.scss'
-                ],
-                tasks: ['compass:dev_ng', 'compass:dev_fd', 'compass:dev_doctype', 'compass:dev_vtb', 'compass:dev_rtc']
-            }
-        },
         concat: {
             dist: {
                 src: ['src/_nowRTC.js', 'src/browserCompatibility.js', 'src/signaling/*.js', 'src/NRTC*.js'],
@@ -42,7 +27,6 @@ module.exports = function(grunt) {
 
     // Load the plugins needed
     grunt.loadNpmTasks('grunt-karma');
-    grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-marked');
 
