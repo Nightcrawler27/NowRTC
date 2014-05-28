@@ -88,24 +88,24 @@ input, button{
 }
 
 .peer-tab-container {
-    flex:auto;
-    flex-flow: column;
-    display: flex;
-}
+  flex:auto;
+  flex-flow: column;
+  display: flex;
 
-.peer-tab {
+  .peer-tab {
     border: solid 1px black;
+  }
 }
 
 .messages {
     flex: 1 1 auto;
     display: flex;
     flex-flow: row;
-}
 
-.message-list {
+  .message-list {
     flex: auto;
     flex-grow: 1;
+  }
 }
 
 .remote-stream-wrapper {
