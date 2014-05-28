@@ -9,4 +9,6 @@ Sample
 ======
 `/sample` contains a simple NodeJS server that handles signaling between peers.
 
-Install using `npm install` and run `node server.js`
+* Install Node dependencies using `npm install`
+* Install Client dependencies using `bower install`
+* Start server with `node server.js`
