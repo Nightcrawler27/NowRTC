@@ -30,6 +30,13 @@ module.exports = function(grunt) {
                 src: ['src/_nowRTC.js', 'src/browserCompatibility.js', 'src/signaling/*.js', 'src/NRTC*.js'],
                 dest: 'dist/now-rtc.js'
             }
+        },
+        marked: {
+            readme: {
+                files: {
+                    'README.html': 'README.md'
+                }
+            }
         }
     });
 
@@ -37,10 +44,12 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-karma');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-marked');
 
 
     // Named tasks to run
     grunt.registerTask('default', ['karma:unit']);
     grunt.registerTask('test-continuous', ['karma:unit', 'watch:scripts']);
     grunt.registerTask('test-unit', ['karma:unit']);
+    grunt.registerTask('readme', ['marked:readme']);
 };
