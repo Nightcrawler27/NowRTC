@@ -13,14 +13,14 @@ var app = connect();
 app.use(connect.logger('dev'));
 app.use(
     sass.middleware({
-        src: __dirname + '/assets/styles/', //where the sass files are
-        dest: __dirname + '/styles', //where css should go
+        src: __dirname + '/../assets/styles/', //where the sass files are
+        dest: __dirname + '/../styles', //where css should go
         debug: true, // obvious
         prefix: "/sample/styles"
     })
 );
 
-app.use(connect.static(__dirname + '/..'));
+app.use(connect.static(__dirname + '/../..'));
 
 var server = http.createServer(app);
 var ioListener = io.listen(server);
