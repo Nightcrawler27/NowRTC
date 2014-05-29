@@ -45,9 +45,11 @@
                 </div>
                 <div class="peer-tab-container" ng-show="activeUser">
                     <div class="messages">
-                        <ul class="message-list">
-                            <li ng-repeat="message in currentPeer.getMessages()">{{message.message}}</li>
-                        </ul>
+                        <div class="message-list">
+                            <ul>
+                                <li ng-repeat="message in currentPeer.getMessages()">{{message.message}}</li>
+                            </ul>
+                        </div>
                         <div class="remote-stream-wrapper">
                             <nrtc-video ng-show="currentPeer.getRemoteStream()" autoplay stream="currentPeer.getRemoteStream()" class="remote-stream" />
                         </div>

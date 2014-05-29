@@ -5,13 +5,19 @@ angular.module("now.rtc").directive("nrtcVideo", function() {
         scope: {
             stream: "="
         },
-        template: "<video autoplay />",
+        template: "<div class='video-wrapper'><video autoplay /></div>",
         link: function(scope, element) {
+            var video = element.find("video").eq(0);
+            video.css({
+                "max-width": "100%",
+                "max-height": "100%"
+            });
+
             scope.$watch("stream", function() {
                 if(!scope.stream)
                     return;
                 console.log("stream changed");
-                attachMediaStream(element[0], scope.stream)
+                attachMediaStream(video[0], scope.stream)
             })
         }
     }
