@@ -3,6 +3,7 @@ var http = require("http");
 var Conversation = require("./conversation");
 var offer = require("./offer");
 var io = require('socket.io');
+var sass = require('node-sass');
 var Q = require('q');
 var listeners = {};
 var chatRequests = {};
@@ -10,6 +11,15 @@ var chatRequests = {};
 var app = connect();
 
 app.use(connect.logger('dev'));
+app.use(
+    sass.middleware({
+        src: __dirname + '/assets/styles/', //where the sass files are
+        dest: __dirname + '/styles', //where css should go
+        debug: true, // obvious
+        prefix: "/sample/styles"
+    })
+);
+
 app.use(connect.static(__dirname + '/..'));
 
 var server = http.createServer(app);

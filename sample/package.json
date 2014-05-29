@@ -10,6 +10,10 @@
   "dependencies": {
     "connect": "^2.15.0",
     "socket.io": "^0.9.16",
-    "q": "^1.0.1"
+    "q": "^1.0.1",
+    "grunt": "^0.4.5",
+    "grunt-contrib-sass": "^0.7.3",
+    "grunt-contrib-watch": "^0.6.1",
+    "node-sass": "^0.8.6"
   }
 }
